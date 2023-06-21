@@ -120,3 +120,11 @@ unsigned long long ullVariable;
 file.read("Windows", "User", &ullVariable);
 ```
 The `file.read` function can accept `std::string`, `int`, `long`, `long long`, `unsigned long long`, `double`, `long double`, and `bool`.
+
+### Make the section and key case insensitive
+To make the section name and key case insensitive you can include this line below at the top of the library's header file.
+```C++
+//Define this at the top of the header.
+#define CASE_INSENSITIVE
+```
+This will convert all section names and keys to lowercase letters.
