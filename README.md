@@ -104,10 +104,10 @@ To read the data the are two different `file.read` functions that can be used.
 The first `file.read` function takes two parameters and returns the key value. The parameters are a section name and a key.
 ```C++
 //Read a string.
-file.read<std::string>("Windows", "User");
+std::string strVariable = file.read<std::string>("Windows", "User");
 
 //Read an unsigned long long.
-file.read<unsigned long long>("Windows", "Id");
+unsigned long long ullVariable = file.read<unsigned long long>("Windows", "Id");
 ```
 The second `file.read` function takes three parameters. These are a section name, a key, and a pointer to the variable you would like the value to be stored in.
 ```C++
