@@ -7,7 +7,7 @@
 #include <filesystem>
 #include <algorithm>
 
-//#define CASE_INSENSITIVE   //Un-define if you would like the 'ConfigFile' to be case insensitive.
+#define CASE_INSENSITIVE 0  //Set to '1', if you would like the 'ConfigFile' to be case insensitive.
 
   /*********************/
  /*   Declarations!   */
@@ -27,7 +27,7 @@ namespace mrt
     };
 
     template <class F, class L>
-    _NODISCARD Pair<F, L> makePair(const F& _first, const L& _last);
+    [[nodiscard]] Pair<F, L> makePair(const F& _first, const L& _last) noexcept;
 
     template <class F, class M, class L>
     class Trio
@@ -42,7 +42,7 @@ namespace mrt
     };
 
     template <class F, class M, class L>
-    _NODISCARD Trio<F, M, L> makeTrio(const F& _first, const M& _mid, const L& _last);
+    [[nodiscard]] Trio<F, M, L> makeTrio(const F& _first, const M& _mid, const L& _last) noexcept;
 
     enum class ConfigFile_Error
     {
@@ -66,11 +66,11 @@ namespace mrt
 
         void clear() noexcept;
 
-        _NODISCARD constexpr ConfigFile_Error error() const noexcept;
+        [[nodiscard]] constexpr ConfigFile_Error error() const noexcept;
 
-        _NODISCARD ConfigFile_Error inFile(std::vector<Trio<std::string, std::string, std::string>>* const _vec);
+        [[nodiscard]] ConfigFile_Error inFile(std::vector<Trio<std::string, std::string, std::string>>* const _vec) const noexcept;
 
-        _NODISCARD ConfigFile_Error outFile(const std::vector<Trio<std::string, std::string, std::string>>* const _vec) const;
+        [[nodiscard]] ConfigFile_Error outFile(const std::vector<Trio<std::string, std::string, std::string>>* const _vec) const noexcept;
     };
 
     class ConfigFile
@@ -90,24 +90,24 @@ namespace mrt
 
         ~ConfigFile();
 
-        _NODISCARD std::vector<Trio<std::string, std::string, std::string>>::iterator find(const std::string& _group, const std::string& _name);
+        [[nodiscard]] std::vector<Trio<std::string, std::string, std::string>>::const_iterator find(const std::string& _group, const std::string& _name) const noexcept;
 
         template <class T>
-        void write(const std::string& _group, const std::string& _name, const T& _value, bool _updateIfPresent = false);
+        void write(const std::string& _group, const std::string& _name, const T& _value, bool _updateIfPresent = false) noexcept;
 
         template <class T>
-        _NODISCARD T read(const std::string& _group, const std::string& _name);
+        [[nodiscard]] T read(const std::string& _group, const std::string& _name) const noexcept;
 
         template <class T>
-        void read(const std::string& _group, const std::string& _name, T* const _variable);
+        void read(const std::string& _group, const std::string& _name, T* const _variable) const noexcept;
 
-        void remove(const std::string& _group, const std::string& _name);
+        void remove(const std::string& _group, const std::string& _name) noexcept;
 
-        void save();
+        void save() noexcept;
 
         void clear() noexcept;
 
-        _NODISCARD constexpr ConfigFile_Error error() const noexcept;
+        [[nodiscard]] constexpr ConfigFile_Error error() const noexcept;
     };
 }
 
@@ -122,7 +122,7 @@ template <class F, class L>
 mrt::Pair<F, L>::Pair(const F& _first, const L& _last) : _first(_first), _last(_last) { }
 
 template <class F, class L>
-mrt::Pair<F, L> mrt::makePair(const F& _first, const L& _last)
+mrt::Pair<F, L> mrt::makePair(const F& _first, const L& _last) noexcept
 {
     return mrt::Pair<F, L>(_first, _last);
 }
@@ -135,10 +135,10 @@ template <class F, class M, class L>
 mrt::Trio<F, M, L>::Trio() : _first(F()), _mid(M()), _last(L()) { }
 
 template <class F, class M, class L>
-mrt::Trio<F, M, L>::Trio(const F& _first, const M& _mid, const L& _last) : _first(_first), _mid(_mid), _last(_last) { }
+mrt::Trio<F, M, L>::Trio(const F& _first, const M& _mid, const L& _last) : _first(_first), _mid(_mid), _last(_last) {  }
 
 template <class F, class M, class L>
-mrt::Trio<F, M, L> mrt::makeTrio(const F& _first, const M& _mid, const L& _last)
+mrt::Trio<F, M, L> mrt::makeTrio(const F& _first, const M& _mid, const L& _last) noexcept
 {
     return mrt::Trio<F, M, L>(_first, _mid, _last);
 }
@@ -163,7 +163,7 @@ void mrt::ConfigFile_Handler::clear() noexcept
     _error = ConfigFile_Error::Success;
 }
 
-mrt::ConfigFile_Error mrt::ConfigFile_Handler::inFile(std::vector<Trio<std::string, std::string, std::string>>* const _vec)
+mrt::ConfigFile_Error mrt::ConfigFile_Handler::inFile(std::vector<Trio<std::string, std::string, std::string>>* const _vec) const noexcept
 {
     if (!_fs->is_open())
     {
@@ -186,25 +186,25 @@ mrt::ConfigFile_Error mrt::ConfigFile_Handler::inFile(std::vector<Trio<std::stri
             std::istringstream ss(line);
             std::string name, value;
 
-            getline(ss, name, '=');
-            getline(ss, value, '\n');
+            getline(ss, name, '='); 
+            getline(ss, value, '\n'); 
 
             if ((name != "") || (value != ""))
             {
 
-#ifdef CASE_INSENSITIVE
+#if CASE_INSENSITIVE == 1
                 transform(group.begin(), group.end(), group.begin(), [](char& c) { return std::tolower(c); });
                 transform(name.begin(), name.end(), name.begin(), [](char& c) { return std::tolower(c); });
 #endif
 
-                _vec->emplace_back(makeTrio(group, name, value));
+                _vec->emplace_back(group, name, value); //Moves the data into a 'Trio' object, and then into the vector.
             }
         }
     }
     return ConfigFile_Error::Success;
 }
 
-mrt::ConfigFile_Error mrt::ConfigFile_Handler::outFile(const std::vector<Trio<std::string, std::string, std::string>>* const _vec) const
+mrt::ConfigFile_Error mrt::ConfigFile_Handler::outFile(const std::vector<Trio<std::string, std::string, std::string>>* const _vec) const noexcept
 {
     if (!_fs->is_open())
     {
@@ -284,16 +284,16 @@ mrt::ConfigFile::ConfigFile(const std::string& _path) : _path(_path)
     }
 }
 
-std::vector<mrt::Trio<std::string, std::string, std::string>>::iterator mrt::ConfigFile::find(const std::string& _group, const std::string& _name)
+std::vector<mrt::Trio<std::string, std::string, std::string>>::const_iterator mrt::ConfigFile::find(const std::string& _group, const std::string& _name) const noexcept
 {
     std::string group(_group), name(_name);
 
-#ifdef CASE_INSENSITIVE
+#if CASE_INSENSITIVE == 1
     transform(group.begin(), group.end(), group.begin(), [](char& c) { return tolower(c); });
     transform(name.begin(), name.end(), name.begin(), [](char& c) { return tolower(c); });
 #endif
 
-    return std::find_if(_configData.begin(), _configData.end(), [&group, &name](const auto& trio)
+    return std::find_if(_configData.cbegin(), _configData.cend(), [&group, &name](const Trio<std::string, std::string, std::string>& trio)
         {
             return trio._first == group && trio._mid == name;
         }
@@ -301,11 +301,11 @@ std::vector<mrt::Trio<std::string, std::string, std::string>>::iterator mrt::Con
 }
 
 template <class T>
-void mrt::ConfigFile::write(const std::string& _group, const std::string& _name, const T& _value, bool _updateIfPresent)
+void mrt::ConfigFile::write(const std::string& _group, const std::string& _name, const T& _value, bool _updateIfPresent) noexcept
 {
     std::string group("[" + _group + "]"), name(_name);
 
-#ifdef CASE_INSENSITIVE
+#if CASE_INSENSITIVE == 1
     transform(group.begin(), group.end(), group.begin(), [](char& c) { return tolower(c); });
     transform(name.begin(), name.end(), name.begin(), [](char& c) { return tolower(c); });
 #endif
@@ -315,258 +315,286 @@ void mrt::ConfigFile::write(const std::string& _group, const std::string& _name,
     std::ostringstream ss;
     ss << _value;
 
-    if (it == _configData.end())   //If setting doesn't exist creates a new one.
+    if (it == _configData.cend())   //If setting doesn't exist creates a new one.
     {
-        _configData.emplace_back(makeTrio(group, name, ss.str()));
+        _configData.emplace_back(group, name, ss.str());
     }
-    else if (it != _configData.end() && _updateIfPresent)   //If setting does exist updates the value.
+    else if (it != _configData.cend() && _updateIfPresent)   //If setting does exist updates the value.
     {
-        (*it)._last = ss.str();
+        _configData[std::distance(_configData.cbegin(), it)]._last = std::move(ss.str());
     }
 }
 
 template <>
-std::string mrt::ConfigFile::read<std::string>(const std::string& _group, const std::string& _name)
+std::string mrt::ConfigFile::read<std::string>(const std::string& _group, const std::string& _name) const noexcept
 {
     std::string group("[" + _group + "]"), name(_name);
 
-#ifdef CASE_INSENSITIVE
+#if CASE_INSENSITIVE == 1
     transform(group.begin(), group.end(), group.begin(), [](char& c) { return std::tolower(c); });
     transform(name.begin(), name.end(), name.begin(), [](char& c) { return std::tolower(c); });
 #endif
 
     auto it = find(group, name);
-    return (it != _configData.end()) ? (*it)._last : "";
+    return (it != _configData.cend()) ? (*it)._last : "";
 }
 
 template <>
-int mrt::ConfigFile::read<int>(const std::string& _group, const std::string& _name)
+char mrt::ConfigFile::read<char>(const std::string& _group, const std::string& _name) const noexcept
 {
     std::string group("[" + _group + "]"), name(_name);
 
-#ifdef CASE_INSENSITIVE
+#if CASE_INSENSITIVE == 1
     transform(group.begin(), group.end(), group.begin(), [](char& c) { return std::tolower(c); });
     transform(name.begin(), name.end(), name.begin(), [](char& c) { return std::tolower(c); });
 #endif
 
     auto it = find(group, name);
-    return (it != _configData.end()) ? std::stoi(((*it)._last)) : 0;
+    return (it != _configData.cend()) ? (*it)._last[0] : ' ';
 }
 
 template <>
-long mrt::ConfigFile::read<long>(const std::string& _group, const std::string& _name)
+int mrt::ConfigFile::read<int>(const std::string& _group, const std::string& _name) const noexcept
 {
     std::string group("[" + _group + "]"), name(_name);
 
-#ifdef CASE_INSENSITIVE
+#if CASE_INSENSITIVE == 1
     transform(group.begin(), group.end(), group.begin(), [](char& c) { return std::tolower(c); });
     transform(name.begin(), name.end(), name.begin(), [](char& c) { return std::tolower(c); });
 #endif
 
     auto it = find(group, name);
-    return (it != _configData.end()) ? std::stol((*it)._last) : 0;
+    return (it != _configData.cend()) ? std::stoi(((*it)._last)) : 0;
 }
 
 template <>
-long long mrt::ConfigFile::read<long long>(const std::string& _group, const std::string& _name)
+long mrt::ConfigFile::read<long>(const std::string& _group, const std::string& _name) const noexcept
 {
     std::string group("[" + _group + "]"), name(_name);
 
-#ifdef CASE_INSENSITIVE
+#if CASE_INSENSITIVE == 1
     transform(group.begin(), group.end(), group.begin(), [](char& c) { return std::tolower(c); });
     transform(name.begin(), name.end(), name.begin(), [](char& c) { return std::tolower(c); });
 #endif
 
     auto it = find(group, name);
-    return (it != _configData.end()) ? std::stoll((*it)._last) : 0;
+    return (it != _configData.cend()) ? std::stol((*it)._last) : 0;
 }
 
 template <>
-unsigned long long mrt::ConfigFile::read<unsigned long long>(const std::string& _group, const std::string& _name)
+long long mrt::ConfigFile::read<long long>(const std::string& _group, const std::string& _name) const noexcept
 {
     std::string group("[" + _group + "]"), name(_name);
 
-#ifdef CASE_INSENSITIVE
+#if CASE_INSENSITIVE == 1
     transform(group.begin(), group.end(), group.begin(), [](char& c) { return std::tolower(c); });
     transform(name.begin(), name.end(), name.begin(), [](char& c) { return std::tolower(c); });
 #endif
 
     auto it = find(group, name);
-    return (it != _configData.end()) ? std::stoull((*it)._last) : 0;
+    return (it != _configData.cend()) ? std::stoll((*it)._last) : 0;
 }
 
 template <>
-double mrt::ConfigFile::read<double>(const std::string& _group, const std::string& _name)
+unsigned long long mrt::ConfigFile::read<unsigned long long>(const std::string& _group, const std::string& _name) const noexcept
 {
-    std::string group("[" + _group + "]"), name(_name);
+	std::string group("[" + _group + "]"), name(_name);
 
-#ifdef CASE_INSENSITIVE
+#if CASE_INSENSITIVE == 1
     transform(group.begin(), group.end(), group.begin(), [](char& c) { return std::tolower(c); });
     transform(name.begin(), name.end(), name.begin(), [](char& c) { return std::tolower(c); });
 #endif
 
     auto it = find(group, name);
-    return (it != _configData.end()) ? std::stod((*it)._last) : 0;
+    return (it != _configData.cend()) ? std::stoull((*it)._last) : 0;
 }
 
 template <>
-long double mrt::ConfigFile::read<long double>(const std::string& _group, const std::string& _name)
+double mrt::ConfigFile::read<double>(const std::string& _group, const std::string& _name) const noexcept
 {
     std::string group("[" + _group + "]"), name(_name);
 
-#ifdef CASE_INSENSITIVE
+#if CASE_INSENSITIVE == 1
     transform(group.begin(), group.end(), group.begin(), [](char& c) { return std::tolower(c); });
     transform(name.begin(), name.end(), name.begin(), [](char& c) { return std::tolower(c); });
 #endif
 
     auto it = find(group, name);
-    return (it != _configData.end()) ? std::stold((*it)._last) : 0;
+    return (it != _configData.cend()) ? std::stod((*it)._last) : 0;
 }
 
 template <>
-bool mrt::ConfigFile::read<bool>(const std::string& _group, const std::string& _name)
+long double mrt::ConfigFile::read<long double>(const std::string& _group, const std::string& _name) const noexcept
 {
     std::string group("[" + _group + "]"), name(_name);
 
-#ifdef CASE_INSENSITIVE
+#if CASE_INSENSITIVE == 1
     transform(group.begin(), group.end(), group.begin(), [](char& c) { return std::tolower(c); });
     transform(name.begin(), name.end(), name.begin(), [](char& c) { return std::tolower(c); });
 #endif
 
     auto it = find(group, name);
-    return (it != _configData.end()) ? (((*it)._last == "1") ? true : false) : false;
+    return (it != _configData.cend()) ? std::stold((*it)._last) : 0;
 }
 
 template <>
-void mrt::ConfigFile::read<std::string>(const std::string& _group, const std::string& _name, std::string* const _variable)
+bool mrt::ConfigFile::read<bool>(const std::string& _group, const std::string& _name) const noexcept
 {
     std::string group("[" + _group + "]"), name(_name);
 
-#ifdef CASE_INSENSITIVE
+#if CASE_INSENSITIVE == 1
     transform(group.begin(), group.end(), group.begin(), [](char& c) { return std::tolower(c); });
     transform(name.begin(), name.end(), name.begin(), [](char& c) { return std::tolower(c); });
 #endif
 
     auto it = find(group, name);
-    *_variable = (it != _configData.end()) ? (*it)._last : "";
+    return (it != _configData.cend()) ? (((*it)._last == "1") ? true : false) : false;
 }
 
 template <>
-void mrt::ConfigFile::read<int>(const std::string& _group, const std::string& _name, int* const _variable)
+void mrt::ConfigFile::read<std::string>(const std::string& _group, const std::string& _name, std::string* const _variable) const noexcept
 {
     std::string group("[" + _group + "]"), name(_name);
 
-#ifdef CASE_INSENSITIVE
+#if CASE_INSENSITIVE == 1
     transform(group.begin(), group.end(), group.begin(), [](char& c) { return std::tolower(c); });
     transform(name.begin(), name.end(), name.begin(), [](char& c) { return std::tolower(c); });
 #endif
 
     auto it = find(group, name);
-    *_variable = (it != _configData.end()) ? std::stoi((*it)._last) : 0;
-}
-
-template <> 
-void mrt::ConfigFile::read<long>(const std::string& _group, const std::string& _name, long* const _variable)
-{
-    std::string group("[" + _group + "]"), name(_name);
-
-#ifdef CASE_INSENSITIVE
-    transform(group.begin(), group.end(), group.begin(), [](char& c) { return std::tolower(c); });
-    transform(name.begin(), name.end(), name.begin(), [](char& c) { return std::tolower(c); });
-#endif
-
-    auto it = find(group, name);
-    *_variable = (it != _configData.end()) ? std::stol((*it)._last) : 0;
+    *_variable = (it != _configData.cend()) ? (*it)._last : "";
 }
 
 template <>
-void mrt::ConfigFile::read<long long>(const std::string& _group, const std::string& _name, long long* const _variable)
+void mrt::ConfigFile::read<char>(const std::string& _group, const std::string& _name, char* const _variable) const noexcept
 {
     std::string group("[" + _group + "]"), name(_name);
 
-#ifdef CASE_INSENSITIVE
+#if CASE_INSENSITIVE == 1
     transform(group.begin(), group.end(), group.begin(), [](char& c) { return std::tolower(c); });
     transform(name.begin(), name.end(), name.begin(), [](char& c) { return std::tolower(c); });
 #endif
 
     auto it = find(group, name);
-    *_variable = (it != _configData.end()) ? std::stoll((*it)._last) : 0;
+    *_variable = (it != _configData.cend()) ? (*it)._last[0] : ' ';
 }
 
 template <>
-void mrt::ConfigFile::read<unsigned long long>(const std::string& _group, const std::string& _name, unsigned long long* const _variable)
+void mrt::ConfigFile::read<int>(const std::string& _group, const std::string& _name, int* const _variable) const noexcept
 {
     std::string group("[" + _group + "]"), name(_name);
 
-#ifdef CASE_INSENSITIVE
+#if CASE_INSENSITIVE == 1
     transform(group.begin(), group.end(), group.begin(), [](char& c) { return std::tolower(c); });
     transform(name.begin(), name.end(), name.begin(), [](char& c) { return std::tolower(c); });
 #endif
 
     auto it = find(group, name);
-    *_variable = (it != _configData.end()) ? std::stoull((*it)._last) : 0;
+    *_variable = (it != _configData.cend()) ? std::stoi((*it)._last) : 0;
 }
 
 template <>
-void mrt::ConfigFile::read<double>(const std::string& _group, const std::string& _name, double* const _variable)
+void mrt::ConfigFile::read<long>(const std::string& _group, const std::string& _name, long* const _variable) const noexcept
 {
     std::string group("[" + _group + "]"), name(_name);
 
-#ifdef CASE_INSENSITIVE
+#if CASE_INSENSITIVE == 1
     transform(group.begin(), group.end(), group.begin(), [](char& c) { return std::tolower(c); });
     transform(name.begin(), name.end(), name.begin(), [](char& c) { return std::tolower(c); });
 #endif
 
     auto it = find(group, name);
-    *_variable = (it != _configData.end()) ? std::stod((*it)._last) : 0;
+    *_variable = (it != _configData.cend()) ? std::stol((*it)._last) : 0;
 }
 
 template <>
-void mrt::ConfigFile::read<long double>(const std::string& _group, const std::string& _name, long double* const _variable)
+void mrt::ConfigFile::read<long long>(const std::string& _group, const std::string& _name, long long* const _variable) const noexcept
 {
     std::string group("[" + _group + "]"), name(_name);
 
-#ifdef CASE_INSENSITIVE
+#if CASE_INSENSITIVE == 1
     transform(group.begin(), group.end(), group.begin(), [](char& c) { return std::tolower(c); });
     transform(name.begin(), name.end(), name.begin(), [](char& c) { return std::tolower(c); });
 #endif
 
     auto it = find(group, name);
-    *_variable = (it != _configData.end()) ? std::stold((*it)._last) : 0;
+    *_variable = (it != _configData.cend()) ? std::stoll((*it)._last) : 0;
 }
 
 template <>
-void mrt::ConfigFile::read<bool>(const std::string& _group, const std::string& _name, bool* const _variable)
+void mrt::ConfigFile::read<unsigned long long>(const std::string& _group, const std::string& _name, unsigned long long* const _variable) const noexcept
 {
     std::string group("[" + _group + "]"), name(_name);
 
-#ifdef CASE_INSENSITIVE
+#if CASE_INSENSITIVE == 1
     transform(group.begin(), group.end(), group.begin(), [](char& c) { return std::tolower(c); });
     transform(name.begin(), name.end(), name.begin(), [](char& c) { return std::tolower(c); });
 #endif
 
     auto it = find(group, name);
-    *_variable = (it != _configData.end()) ? (((*it)._last == "1") ? true : false) : false;
+    *_variable = (it != _configData.cend()) ? std::stoull((*it)._last) : 0;
 }
 
-void mrt::ConfigFile::remove(const std::string& _group, const std::string& _name)
+template <>
+void mrt::ConfigFile::read<double>(const std::string& _group, const std::string& _name, double* const _variable) const noexcept
 {
     std::string group("[" + _group + "]"), name(_name);
 
-#ifdef CASE_INSENSITIVE
+#if CASE_INSENSITIVE == 1
+    transform(group.begin(), group.end(), group.begin(), [](char& c) { return std::tolower(c); });
+    transform(name.begin(), name.end(), name.begin(), [](char& c) { return std::tolower(c); });
+#endif
+
+    auto it = find(group, name);
+    *_variable = (it != _configData.cend()) ? std::stod((*it)._last) : 0;
+}
+
+template <>
+void mrt::ConfigFile::read<long double>(const std::string& _group, const std::string& _name, long double* const _variable) const noexcept
+{
+    std::string group("[" + _group + "]"), name(_name);
+
+#if CASE_INSENSITIVE == 1
+    transform(group.begin(), group.end(), group.begin(), [](char& c) { return std::tolower(c); });
+    transform(name.begin(), name.end(), name.begin(), [](char& c) { return std::tolower(c); });
+#endif
+
+    auto it = find(group, name);
+    *_variable = (it != _configData.cend()) ? std::stold((*it)._last) : 0;
+}
+
+template <>
+void mrt::ConfigFile::read<bool>(const std::string& _group, const std::string& _name, bool* const _variable) const noexcept
+{
+    std::string group("[" + _group + "]"), name(_name);
+
+#if CASE_INSENSITIVE == 1
+    transform(group.begin(), group.end(), group.begin(), [](char& c) { return std::tolower(c); });
+    transform(name.begin(), name.end(), name.begin(), [](char& c) { return std::tolower(c); });
+#endif
+
+    auto it = find(group, name);
+    *_variable = (it != _configData.cend()) ? (((*it)._last == "1") ? true : false) : false;
+}
+
+void mrt::ConfigFile::remove(const std::string& _group, const std::string& _name) noexcept
+{
+    std::string group("[" + _group + "]"), name(_name);
+
+#if CASE_INSENSITIVE == 1
     transform(group.begin(), group.end(), group.begin(), [](char& c) { return std::tolower(c); });
     transform(name.begin(), name.end(), name.begin(), [](char& c) { return std::tolower(c); });
 #endif
 
     auto it = find(group, name);
 
-    if (it != _configData.end())
+    if (it != _configData.cend())
     {
         _configData.erase(it);
     }
 }
 
-void mrt::ConfigFile::save()
+void mrt::ConfigFile::save() noexcept
 {
     ConfigFile_Handler out(_path, &_configData, true);
     _error = out.error();
