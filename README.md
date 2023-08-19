@@ -60,12 +60,16 @@ To generate or input a file you can use one of two constructors.
 The first constructor will take no parameters and will use `\FileConfig.ini` as a default file name and either input the file if it already exists in the project's directory or will generate a new file with the default name:
 ```C++
 //Default constructor.
-mrt::ConfigFile file;
+mrt::ConfigFile<std::string> file;
+  OR
+mrt::ConfigFile<std::wstring> file;
 ```
 The second constructor takes a file path as a parameter and will either input the file if it exists at the given path or generate a new file with the given file name.
 ```C++
 //Second constructor.
-mrt::ConfigFile file("C:\\Users\\MrTst\\Downloads\\ConfigFile.ini");
+mrt::ConfigFile<std::string> file("C:\\Users\\MrTst\\Downloads\\ConfigFile.ini");
+  OR
+mrt::ConfigFile<std::wstring> file(L"C:\\Users\\MrTst\\Downloads\\ConfigFile.ini");
 ```
 
 ### Outputting the INI
