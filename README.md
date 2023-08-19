@@ -88,55 +88,47 @@ file.save(&std::cout);
 ```
 
 ### Writing Data
-The `file.write` function takes four parameters. These are a section name, a key, a key value, and a boolean.
+The `file.write()` function takes four parameters. These are a section name, a key, a key value, and a boolean.
 
 If you would not like to update the key value if the key is already present:
 ```C++
 //Will not update the key value.
-file.write("Windows", "User", "MrT Stephens");
+file.write("[Windows]", "User", "MrT Stephens");
 ```
 If you would like to update the key value if the key is already present:
 ```C++
 //Will update the key value.
-file.write("Windows", "User", "MrT Stephens", true);
+file.write("[Windows]", "User", "MrT Stephens", true);
 ```
 
 ### Remove Data
-The `file.remove` function takes two parameters. These are a section name and a section key.
+The `file.remove()` function takes two parameters. These are a section name and a section key.
 ```C++
 //Remove a key.
-file.remove("Windows", "User");
+file.remove("[Windows]", "User");
 ```
 > **Note**
-> Once the `file.remove` function has been called the key will be removed from memory, but not the file until the `file.save` function has been called.
+> Once the `file.remove()` function has been called the key will be removed from memory, but not the file until the `file.save()` function has been called.
 
 ### Reading Data
-To read the data the are two different `file.read` functions that can be used.
+To read the data the are two different `file.read()` functions that can be used.
 
-The first `file.read` function takes two parameters and returns the key value. The parameters are a section name and a key.
+The first `file.read()` function takes two parameters and returns the key value. The parameters are a section name and a key.
 ```C++
 //Read a string.
-std::string strVariable = file.read<std::string>("Windows", "User");
+std::string strVariable = file.read<std::string>("[Windows]", "User");
 
 //Read an unsigned long long.
-unsigned long long ullVariable = file.read<unsigned long long>("Windows", "Id");
+unsigned long long ullVariable = file.read<unsigned long long>("[Windows]", "Id");
 ```
-The second `file.read` function takes three parameters. These are a section name, a key, and a pointer to the variable you would like the value to be stored in.
+The second `file.read()` function takes three parameters. These are a section name, a key, and a pointer to the variable you would like the value to be stored in.
 ```C++
 //Read a string.
 std::string strVariable;
-file.read("Windows", "User", &strVariable);
+file.read("[Windows]", "User", &strVariable);
 
 //Read a unsigned long long.
 unsigned long long ullVariable;
-file.read("Windows", "User", &ullVariable);
+file.read("[Windows]", "User", &ullVariable);
 ```
-The `file.read` function can accept `std::string`, `int`, `long`, `long long`, `unsigned long long`, `double`, `long double`, and `bool`.
-
-### Make the section and key case insensitive
-To make the section name and key case insensitive you can include this line below at the top of the library's header file.
-```C++
-//Define this at the top of the header.
-#define CASE_INSENSITIVE
-```
-This will convert all section names and keys to lowercase letters.
+The `file.read()` function can accept `std::string OR std::wstring`, `int`, `long`, `long long`, `unsigned long long`, `double`, `long double`, and `bool`.
