@@ -39,7 +39,7 @@ key=value
 ```
 
 Files are inputted on demand in one go, after which the data is kept in memory and is ready to be manipulated. Files are closed after read or write operations. The section and key order are preserved after read-and-write operations.
-The library uses `std::string` when manipulating the data, but when reading the data, you can specify what type you would like the value returned in.
+The library uses `std::string OR std::wstring` when manipulating the data, but when reading the data, you can specify what type you would like the value returned in.
 
 ## Installation
 This is a header-only library. To install it, just copy everything in the repository into your own project's source code folder or clone the repository using:
@@ -57,7 +57,7 @@ After which use `#include` to integrate the header into your project:
 ### Generating / inputting the INI
 To generate or input a file you can use one of two constructors.
 
-The first constructor will take no parameters and will use `\FileConfig.ini` as a default file name and either input the file if it already exists in the project's directory or will generate a new file with the default name:
+The first constructor will take no parameters and will use `\UserConfig.ini` as a default file name and either input the file if it already exists in the project's directory or will generate a new file with the default name:
 ```C++
 //Default constructor.
 mrt::ConfigFile<std::string> file;
@@ -67,9 +67,9 @@ mrt::ConfigFile<std::wstring> file;
 The second constructor takes a file path as a parameter and will either input the file if it exists at the given path or generate a new file with the given file name.
 ```C++
 //Second constructor.
-mrt::ConfigFile<std::string> file("C:\\Users\\MrTst\\Downloads\\ConfigFile.ini");
+mrt::ConfigFile<std::string> file("C:\\Users\\MrTst\\Downloads\\UserConfig.ini");
   OR
-mrt::ConfigFile<std::wstring> file(L"C:\\Users\\MrTst\\Downloads\\ConfigFile.ini");
+mrt::ConfigFile<std::wstring> file(L"C:\\Users\\MrTst\\Downloads\\UserConfig.ini");
 ```
 
 ### Outputting the INI
