@@ -73,10 +73,18 @@ mrt::ConfigFile<std::wstring> file(L"C:\\Users\\MrTst\\Downloads\\ConfigFile.ini
 ```
 
 ### Outputting the INI
-To output the file you just need to call the `file.save()` and this will output the file to the specified path.
+To output the INI you need to call one of two functions.
+
+To output the file to the specified path you need to call the `file.save()` function.
 ```C++
 //Save the INI file.
 file.save();
+```
+
+To output the file to the specified stream you need to call the `file.save(&stream)` function, passing in a pointer to the output stream object.
+```C++
+//Save the INI file to a stream.
+file.save(&std::cout);
 ```
 
 ### Writing Data
