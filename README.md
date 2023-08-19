@@ -45,7 +45,7 @@ The library uses `std::string OR std::wstring` when manipulating the data, but w
 This is a header-only library. To install it, just copy everything in the repository into your own project's source code folder or clone the repository using:
 ```bash
 # Clone this repository
-$ git clone https://github.com/MrT-Stephens/CPP-INI-Config-File-library
+$ git clone https://github.com/MrT-Stephens/CPP-INI-Config-File-Library
 ```
 After which use `#include` to integrate the header into your project:
 ```C++
