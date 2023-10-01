@@ -5,7 +5,7 @@
   <br>
 </h1>
 
-<h4 align="center">A simple c++ INI configiration file library for different applications!</h4>
+<h4 align="center">A simple c++ header only INI configiration file library for different applications!</h4>
 
 <p align="center">
   <a href="#infomation">Infomation</a> •
